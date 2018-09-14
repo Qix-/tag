@@ -1,7 +1,7 @@
 {
 	"name": "tag",
 	"description": "Tag build generator",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"main": {
 		"tag": "./cli.js"
 	},
