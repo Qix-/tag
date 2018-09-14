@@ -10,10 +10,12 @@ _debug.names.push(/^tag$/, /^tag:echo$/);
 const debug = _debug('tag');
 let debugv = () => {};
 
+const variablePattern = /^([a-z_+][a-z0-9_+:]*)=(.+)?$/i;
+
 const helpText = chalk`
  {bold tag} - yet another build script generator
 
- {dim $} tag -v [{underline task} ...] [+{underline tag} ...]
+ {dim $} tag -v [{underline task} ...] [+{underline tag} ...] [{underline NAME}=[{underline value}] ...]
  {dim $} tag --help
 
  OPTIONS
@@ -22,6 +24,9 @@ const helpText = chalk`
    --verbose, -v     verbose output
 
    +{underline tag_name}         enables a tag by name
+                     (can be specified multiple times)
+
+   {underline NAME}=[{underline value}]      sets a variable
                      (can be specified multiple times)
 `;
 
@@ -59,11 +64,18 @@ const namespace = {};
 	const new_args = [];
 
 	for (const arg of args._) {
+		let variable;
+
 		if (arg[0] === '+') {
 			// TODO validate tag format
 			namespace[arg.substring(1)] = {
 				type: 'tag',
 				enabled: true
+			};
+		} else if ((variable = variablePattern.exec(arg))) {
+			namespace[variable[1]] = {
+				type: 'variable',
+				value: variable[2]
 			};
 		} else {
 			new_args.push(arg);
