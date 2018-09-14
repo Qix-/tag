@@ -5,7 +5,7 @@ const chalk = require('chalk');
 const _debug = require('debug');
 const fs = require('promise-fs');
 
-_debug.names.push(/^tag$/);
+_debug.names.push(/^tag$/, /^tag:echo$/);
 
 const debug = _debug('tag');
 let debugv = () => {};
@@ -50,6 +50,22 @@ if (args['--verbose']) {
 async function main() {
 	await fs.access('./Tagfile', fs.constants.R_OK);
 	debugv('correct access to Tagfile in:', process.cwd());
+
+	const buf = await fs.readFile('./Tagfile');
+	debugv('read Tagfile completely: %d bytes', buf.length);
+	const contents = buf.toString('utf-8');
+
+	const {parseTagfile} = require('./lib/parser');
+
+	const namespace = {};
+
+	const tagfile = parseTagfile(contents, './Tagfile', {
+		namespace,
+		echoFn: _debug('tag:echo')
+	});
+
+	// XXX DEBUG
+	debug('%O', tagfile);
 }
 
 main().catch(error => {
