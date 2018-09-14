@@ -13,13 +13,16 @@ let debugv = () => {};
 const helpText = chalk`
  {bold tag} - yet another build script generator
 
- {dim $} tag -v [{underline task}...]
+ {dim $} tag -v [{underline task} ...] [+{underline tag} ...]
  {dim $} tag --help
 
  OPTIONS
    --help            shows this help message
    --version, -V     shows the version string
    --verbose, -v     verbose output
+
+   +{underline tag_name}         enables a tag by name
+                     (can be specified multiple times)
 `;
 
 const args = arg({
@@ -29,7 +32,10 @@ const args = arg({
 	'-v': '--verbose',
 
 	'--version': Boolean,
-	'-V': '--version'
+	'-V': '--version',
+
+	'--tag': [String],
+	'-T': '--tag'
 });
 
 if (args['--help']) {
@@ -47,6 +53,34 @@ if (args['--verbose']) {
 	debugv = _debug('tag:cli');
 }
 
+const namespace = {};
+
+{
+	const new_args = [];
+
+	for (const arg of args._) {
+		if (arg[0] === '+') {
+			// TODO validate tag format
+			namespace[arg.substring(1)] = {
+				type: 'tag',
+				enabled: true
+			};
+		} else {
+			new_args.push(arg);
+		}
+	}
+
+	args._ = new_args;
+}
+
+const tasks = args._;
+if (tasks.length === 0) {
+	tasks.push('all');
+}
+
+// TODO validate task formats
+debugv('tasks to run:', ...tasks);
+
 async function main() {
 	await fs.access('./Tagfile', fs.constants.R_OK);
 	debugv('correct access to Tagfile in:', process.cwd());
@@ -57,11 +91,8 @@ async function main() {
 
 	const {parseTagfile} = require('./lib/parser');
 
-	const namespace = {};
-
 	const tagfile = parseTagfile(contents, './Tagfile', {
-		namespace,
-		echoFn: _debug('tag:echo')
+		namespace
 	});
 
 	// XXX DEBUG
