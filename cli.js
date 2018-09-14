@@ -61,7 +61,7 @@ if (args['--verbose']) {
 const namespace = {};
 
 {
-	const new_args = [];
+	const newArgs = [];
 
 	for (const arg of args._) {
 		let variable;
@@ -78,11 +78,11 @@ const namespace = {};
 				value: variable[2]
 			};
 		} else {
-			new_args.push(arg);
+			newArgs.push(arg);
 		}
 	}
 
-	args._ = new_args;
+	args._ = newArgs;
 }
 
 const tasks = args._;
