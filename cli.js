@@ -5,6 +5,8 @@ const chalk = require('chalk');
 const _debug = require('debug');
 const fs = require('promise-fs');
 
+// NOTE: don't import anything before this line that
+//       uses the `tag:*` namespaces.
 _debug.names.push(/^tag$/, /^tag:echo$/);
 
 const debug = _debug('tag');
@@ -102,10 +104,11 @@ async function main() {
 	const contents = buf.toString('utf-8');
 
 	const {parseTagfile} = require('./lib/parser');
+	const {TagAPI} = require('./lib/api');
 
-	const tagfile = parseTagfile(contents, './Tagfile', {
-		namespace
-	});
+	const api = new TagAPI();
+
+	const tagfile = parseTagfile(contents, './Tagfile', api);
 
 	// XXX DEBUG
 	debug('%O', tagfile);
