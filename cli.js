@@ -1,5 +1,7 @@
 #!/usr/bin/env node --experimental-worker
 
+const path = require('path');
+
 const arg = require('arg');
 const chalk = require('chalk');
 const _debug = require('debug');
@@ -108,10 +110,24 @@ async function main() {
 
 	const api = new TagAPI();
 
-	const tagfile = parseTagfile(contents, './Tagfile', api);
+	const namespace = {
+		'TAGPATH': {
+			type: 'variable',
+			value: [
+				path.join(__dirname, 'stdlib/%.tag'),
+				'./%.tag',
+				'./%.js',
+				'./%',
+				'./node_modules/%/index.tag',
+				'./node_modules/%/index.js',
+				'./node_modules/%.tag',
+				'./node_modules/%.js',
+				'./node_modules/%'
+			].join(':')
+		}
+	};
 
-	// XXX DEBUG
-	debug('%O', tagfile);
+	parseTagfile(contents, './Tagfile', {api, namespace});
 }
 
 main().catch(error => {
