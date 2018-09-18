@@ -111,7 +111,7 @@ async function main() {
 	const api = new TagAPI();
 
 	const namespace = {
-		'TAGPATH': {
+		TAGPATH: {
 			type: 'variable',
 			value: [
 				path.join(__dirname, 'stdlib/%.tag'),
