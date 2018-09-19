@@ -2,7 +2,7 @@
 	"name": "tag",
 	"description": "Tag build generator",
 	"version": "0.1.0",
-	"main": {
+	"bin": {
 		"tag": "./cli.js"
 	},
 	"author": "Josh Junon <josh@junon.me>",
