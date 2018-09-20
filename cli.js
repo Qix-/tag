@@ -17,6 +17,7 @@ let debugv = () => {};
 
 const variablePattern = /^([a-z_+][a-z0-9_+:]*)=(.+)?$/i;
 const taskPattern = /^[a-z_+][a-z0-9_+:]*$/i;
+const tagPattern = /^[a-z_+][a-z0-9_+:]*$/i;
 
 const helpText = chalk`
  {bold tag} - yet another build script generator
@@ -117,8 +118,17 @@ async function main() {
 
 			// TODO make sure they're not overwriting an existing value.
 			if (arg[0] === '+') {
-				// TODO validate tag format
-				namespace[arg.substring(1)] = {
+				const name = arg.substring(1);
+
+				if (!tagPattern.test(name)) {
+					throw new Error(`invalid tag format: ${name}`);
+				}
+
+				if (namespace[name]) {
+					throw new Error(`attempting to enable non-tag '${name}' which is of type '${namespace[name].type}'`);
+				}
+
+				namespace[name] = {
 					type: 'tag',
 					enabled: true
 				};
@@ -144,6 +154,8 @@ async function main() {
 	const contents = buf.toString('utf-8');
 
 	const parseTagfile = require('tag-parser');
+
+	debugv('initial namespace (before plugin): %O', namespace);
 
 	const tagfile = (() => {
 		try {
