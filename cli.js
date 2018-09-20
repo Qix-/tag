@@ -173,7 +173,8 @@ async function main() {
 		}
 	})();
 
-	plugin({
+	// Return to allow promises to work
+	return plugin({
 		tagfile,
 		namespace,
 		log: debug,
