@@ -166,6 +166,8 @@ async function main() {
 		}
 	})();
 
+	debugv('tagfile: %O', tagfile);
+
 	const plugin = (() => {
 		try {
 			return require(`tag-plugin-${args['--plugin']}`);
