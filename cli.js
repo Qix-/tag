@@ -16,6 +16,7 @@ const debugEcho = _debug('tag:echo');
 let debugv = () => {};
 
 const variablePattern = /^([a-z_+][a-z0-9_+:]*)=(.+)?$/i;
+const taskPattern = /^[a-z_+][a-z0-9_+:]*$/i;
 
 const helpText = chalk`
  {bold tag} - yet another build script generator
@@ -72,49 +73,6 @@ if (args['--verbose']) {
 	debugv = _debug('tag:cli');
 }
 
-const namespace = {
-	TAGPATH: {
-		type: 'variable',
-		value: [
-			path.join(__dirname, 'stdlib/%.tag'),
-			'./%.tag',
-			'./%.js',
-			'./%',
-			'./node_modules/%/index.tag',
-			'./node_modules/%/index.js',
-			'./node_modules/%.tag',
-			'./node_modules/%.js',
-			'./node_modules/%'
-		].join(':')
-	}
-};
-
-{
-	const newArgs = [];
-
-	for (const arg of args._) {
-		let variable;
-
-		// TODO make sure they're not overwriting an existing value.
-		if (arg[0] === '+') {
-			// TODO validate tag format
-			namespace[arg.substring(1)] = {
-				type: 'tag',
-				enabled: true
-			};
-		} else if ((variable = variablePattern.exec(arg))) {
-			namespace[variable[1]] = {
-				type: 'variable',
-				value: variable[2]
-			};
-		} else {
-			newArgs.push(arg);
-		}
-	}
-
-	args._ = newArgs;
-}
-
 args['--tagfile'] = args['--tagfile'] || './Tagfile';
 args['--plugin'] = args['--plugin'] || 'system';
 
@@ -123,11 +81,59 @@ if (tasks.length === 0) {
 	tasks.push('all');
 }
 
-// TODO validate task formats
-debugv('tasks to run:', ...tasks);
-
 async function main() {
 	debugv('arguments: %O', args);
+
+	tasks.forEach(task => {
+		if (!taskPattern.test(task)) {
+			throw new Error(`task name is invalid: ${task}`);
+		}
+	});
+
+	debugv('tasks to run:', ...tasks);
+
+	const namespace = {
+		TAGPATH: {
+			type: 'variable',
+			value: [
+				path.join(__dirname, 'stdlib/%.tag'),
+				'./%.tag',
+				'./%.js',
+				'./%',
+				'./node_modules/%/index.tag',
+				'./node_modules/%/index.js',
+				'./node_modules/%.tag',
+				'./node_modules/%.js',
+				'./node_modules/%'
+			].join(':')
+		}
+	};
+
+	{
+		const newArgs = [];
+
+		for (const arg of args._) {
+			let variable;
+
+			// TODO make sure they're not overwriting an existing value.
+			if (arg[0] === '+') {
+				// TODO validate tag format
+				namespace[arg.substring(1)] = {
+					type: 'tag',
+					enabled: true
+				};
+			} else if ((variable = variablePattern.exec(arg))) {
+				namespace[variable[1]] = {
+					type: 'variable',
+					value: variable[2]
+				};
+			} else {
+				newArgs.push(arg);
+			}
+		}
+
+		args._ = newArgs;
+	}
 
 	await fs.access(args['--tagfile'], fs.constants.R_OK);
 	const resolvedPath = path.resolve(args['--tagfile']);
@@ -143,6 +149,7 @@ async function main() {
 		try {
 			return parseTagfile(contents);
 		} catch (error) {
+			error.filename = resolvedPath;
 			error.source = contents;
 		}
 	})();
@@ -168,6 +175,7 @@ async function main() {
 }
 
 main().catch(error => {
+	// TODO check for contents and position and show source location
 	debug('fatal error: %s', error.message);
 	process.exit(1);
 });
