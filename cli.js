@@ -173,7 +173,7 @@ async function main() {
 			return require(`tag-plugin-${args['--plugin']}`);
 		} catch (error) {
 			if (error.code === 'MODULE_NOT_FOUND') {
-				throw new Error(`Tag plugin '${args['--plugin']}' not found (is 'tag-plugin-${args['--plugin']}' installed?)`);
+				throw new Error(`tag plugin '${args['--plugin']}' not found (is 'tag-plugin-${args['--plugin']}' installed?)`);
 			}
 
 			throw error;
