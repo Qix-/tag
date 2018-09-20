@@ -12,6 +12,7 @@ const fs = require('promise-fs');
 _debug.names.push(/^tag$/, /^tag:echo$/);
 
 const debug = _debug('tag');
+const debugEcho = _debug('tag:echo');
 let debugv = () => {};
 
 const variablePattern = /^([a-z_+][a-z0-9_+:]*)=(.+)?$/i;
@@ -26,6 +27,9 @@ const helpText = chalk`
    --help                    shows this help message
    --version, -V             shows the version string
    --verbose, -v             verbose output
+
+   --plugin, -P {underline name}         plugin to use
+                             (defaults to 'system')
 
    --tagfile, -F {underline filename}    the filename to read as the Tagfile
                              (defaults to './Tagfile')
@@ -47,7 +51,10 @@ const args = arg({
 	'-V': '--version',
 
 	'--tagfile': String,
-	'-F': '--tagfile'
+	'-F': '--tagfile',
+
+	'--plugin': String,
+	'-P': '--plugin'
 });
 
 if (args['--help']) {
@@ -109,6 +116,7 @@ const namespace = {
 }
 
 args['--tagfile'] = args['--tagfile'] || './Tagfile';
+args['--plugin'] = args['--plugin'] || 'system';
 
 const tasks = args._;
 if (tasks.length === 0) {
@@ -119,6 +127,8 @@ if (tasks.length === 0) {
 debugv('tasks to run:', ...tasks);
 
 async function main() {
+	debugv('arguments: %O', args);
+
 	await fs.access(args['--tagfile'], fs.constants.R_OK);
 	const resolvedPath = path.resolve(args['--tagfile']);
 	debugv('correct access to Tagfile:', resolvedPath);
@@ -137,10 +147,27 @@ async function main() {
 		}
 	})();
 
-	debugv(tagfile);
+	const plugin = (() => {
+		try {
+			return require(`tag-plugin-${args['--plugin']}`);
+		} catch (error) {
+			if (error.code === 'MODULE_NOT_FOUND') {
+				throw new Error(`Tag plugin '${args['--plugin']}' not found (is 'tag-plugin-${args['--plugin']}' installed?)`);
+			}
+
+			throw error;
+		}
+	})();
+
+	plugin({
+		tagfile,
+		namespace,
+		log: debug,
+		echo: debugEcho
+	});
 }
 
 main().catch(error => {
-	debug('fatal error: %O', error);
+	debug('fatal error: %s', error.message);
 	process.exit(1);
 });
