@@ -102,7 +102,6 @@ async function main() {
 	for (const arg of args._) {
 		let variable;
 
-		// TODO make sure they're not overwriting an existing value.
 		if (arg[0] === '@') {
 			const name = arg.substring(1);
 
@@ -110,7 +109,7 @@ async function main() {
 				throw new Error(`invalid tag format: ${name}`);
 			}
 
-			if (namespace[name]) {
+			if (namespace[name] && namespace[name].type !== 'tag') {
 				throw new Error(`attempting to enable non-tag '${name}' which is of type '${namespace[name].type}'`);
 			}
 
@@ -119,7 +118,13 @@ async function main() {
 				enabled: true
 			};
 		} else if ((variable = variablePattern.exec(arg))) {
-			namespace[variable[1]] = {
+			const name = variable[1];
+
+			if (namespace[name] && namespace[name].type !== 'variable') {
+				throw new Error(`attempting to enable non-variable '${name}' which is of type '${namespace[name].type}'`);
+			}
+
+			namespace[name] = {
 				type: 'variable',
 				value: variable[2]
 			};
