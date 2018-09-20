@@ -20,9 +20,9 @@ const taskPattern = /^[a-z_+][a-z0-9_+:]*$/i;
 const tagPattern = /^[a-z_+][a-z0-9_+:]*$/i;
 
 const helpText = chalk`
- {bold tag} - yet another build script generator
+ {bold tag} - yet another task runner
 
- {dim $} tag -v [{underline task} ...] [+{underline tag} ...] [{underline NAME}=[{underline value}] ...]
+ {dim $} tag -v [{underline task} ...] [@{underline tag} ...] [{underline NAME}=[{underline value}] ...]
  {dim $} tag --help
 
  OPTIONS
@@ -36,7 +36,7 @@ const helpText = chalk`
    --tagfile, -F {underline filename}    the filename to read as the Tagfile
                              (defaults to './Tagfile')
 
-   +{underline tag_name}                 enables a tag by name
+   @{underline tag_name}                 enables a tag by name
                              (can be specified multiple times)
 
    {underline NAME}=[{underline value}]              sets a variable
@@ -77,21 +77,8 @@ if (args['--verbose']) {
 args['--tagfile'] = args['--tagfile'] || './Tagfile';
 args['--plugin'] = args['--plugin'] || 'system';
 
-const tasks = args._;
-if (tasks.length === 0) {
-	tasks.push('all');
-}
-
 async function main() {
 	debugv('arguments: %O', args);
-
-	tasks.forEach(task => {
-		if (!taskPattern.test(task)) {
-			throw new Error(`task name is invalid: ${task}`);
-		}
-	});
-
-	debugv('tasks to run:', ...tasks);
 
 	const namespace = {
 		TAGPATH: {
@@ -110,40 +97,48 @@ async function main() {
 		}
 	};
 
-	{
-		const newArgs = [];
+	const tasks = [];
 
-		for (const arg of args._) {
-			let variable;
+	for (const arg of args._) {
+		let variable;
 
-			// TODO make sure they're not overwriting an existing value.
-			if (arg[0] === '+') {
-				const name = arg.substring(1);
+		// TODO make sure they're not overwriting an existing value.
+		if (arg[0] === '@') {
+			const name = arg.substring(1);
 
-				if (!tagPattern.test(name)) {
-					throw new Error(`invalid tag format: ${name}`);
-				}
-
-				if (namespace[name]) {
-					throw new Error(`attempting to enable non-tag '${name}' which is of type '${namespace[name].type}'`);
-				}
-
-				namespace[name] = {
-					type: 'tag',
-					enabled: true
-				};
-			} else if ((variable = variablePattern.exec(arg))) {
-				namespace[variable[1]] = {
-					type: 'variable',
-					value: variable[2]
-				};
-			} else {
-				newArgs.push(arg);
+			if (!tagPattern.test(name)) {
+				throw new Error(`invalid tag format: ${name}`);
 			}
-		}
 
-		args._ = newArgs;
+			if (namespace[name]) {
+				throw new Error(`attempting to enable non-tag '${name}' which is of type '${namespace[name].type}'`);
+			}
+
+			namespace[name] = {
+				type: 'tag',
+				enabled: true
+			};
+		} else if ((variable = variablePattern.exec(arg))) {
+			namespace[variable[1]] = {
+				type: 'variable',
+				value: variable[2]
+			};
+		} else {
+			tasks.push(arg);
+		}
 	}
+
+	if (tasks.length === 0) {
+		tasks.push('all');
+	}
+
+	tasks.forEach(task => {
+		if (!taskPattern.test(task)) {
+			throw new Error(`task name is invalid: ${task}`);
+		}
+	});
+
+	debugv('tasks to run:', ...tasks);
 
 	await fs.access(args['--tagfile'], fs.constants.R_OK);
 	const resolvedPath = path.resolve(args['--tagfile']);
