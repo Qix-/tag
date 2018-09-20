@@ -1,12 +1,10 @@
 # Tag
 
-**Tag** is a task runner/'renderer' (see _Why?_) that employs a _very_ basic
+**Tag** is a task runner/build script generator that employs a _very_ basic
 DSL in order to specify job dependencies with potentially complex
-build configuration setups.
+build configurations (variants).
 
-Tag is most similar to GNU Make.
-
-Tag consists of just a few primitives...
+Tag is most similar to GNU Make, and consists of just a few primitives:
 
 - **Rules** - map inputs to targets (outputs)
 - **Tasks** - pseudo-commands to build a pre-determined set of targets (similar to `.PHONY` rules in GNU Make)
@@ -21,6 +19,77 @@ Tag consists of just a few primitives...
   This is similar to `set -u` in shell script.
 - **Unopinionated** - Tag doesn't make any assumptions about what you're trying to run. It simply runs it
   in various ways. Use tag as a build system, tag runner, scripting language, etc.
+
+## Installation
+
+Install Tag by running **one** of the following commands:
+
+```console
+$ yarn global add tag
+$ npm i -g tag
+```
+
+Installation includes the following plugins out of the box:
+
+- **System** (`tag-plugin-system`) - runs the commands using the `child_process` module built into Node.
+
+## Usage
+
+```console
+$ tag --help
+
+ tag - yet another task runner
+
+ $ tag -v [task ...] [@tag ...] [NAME=[value] ...]
+ $ tag --help
+
+ OPTIONS
+   --help                    shows this help message
+   --version, -V             shows the version string
+   --verbose, -v             verbose output
+
+   --plugin, -P name         plugin to use
+                             (defaults to 'system')
+
+   --tagfile, -F filename    the filename to read as the Tagfile
+                             (defaults to './Tagfile')
+
+   @tag_name                 enables a tag by name
+                             (can be specified multiple times)
+
+   NAME=[value]              sets a variable
+                             (can be specified multiple times)
+```
+
+For example, to run Tag using the working directory's `Tagfile` with the `all` task (the default), simply run
+
+```console
+$ tag
+```
+
+To enable the `foo` tag:
+
+```console
+$ tag @foo
+```
+
+To set the variable `FOO` to `Bar`:
+
+```console
+$ tag FOO=Bar
+```
+
+To run `clean` and then `all` (a full rebuild):
+
+```console
+$ tag clean all
+```
+
+And finally, you may combine all of these together:
+
+```console
+$ tag clean all @foo @bar SOME_VAR='Some value'
+```
 
 ## Why?
 
