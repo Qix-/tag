@@ -23,15 +23,18 @@ const helpText = chalk`
  {dim $} tag --help
 
  OPTIONS
-   --help            shows this help message
-   --version, -V     shows the version string
-   --verbose, -v     verbose output
+   --help                    shows this help message
+   --version, -V             shows the version string
+   --verbose, -v             verbose output
 
-   +{underline tag_name}         enables a tag by name
-                     (can be specified multiple times)
+   --tagfile, -F {underline filename}    the filename to read as the Tagfile
+                             (defaults to './Tagfile')
 
-   {underline NAME}=[{underline value}]      sets a variable
-                     (can be specified multiple times)
+   +{underline tag_name}                 enables a tag by name
+                             (can be specified multiple times)
+
+   {underline NAME}=[{underline value}]              sets a variable
+                             (can be specified multiple times)
 `;
 
 const args = arg({
@@ -43,8 +46,8 @@ const args = arg({
 	'--version': Boolean,
 	'-V': '--version',
 
-	'--tag': [String],
-	'-T': '--tag'
+	'--tagfile': String,
+	'-F': '--tagfile'
 });
 
 if (args['--help']) {
@@ -62,7 +65,22 @@ if (args['--verbose']) {
 	debugv = _debug('tag:cli');
 }
 
-const namespace = {};
+const namespace = {
+	TAGPATH: {
+		type: 'variable',
+		value: [
+			path.join(__dirname, 'stdlib/%.tag'),
+			'./%.tag',
+			'./%.js',
+			'./%',
+			'./node_modules/%/index.tag',
+			'./node_modules/%/index.js',
+			'./node_modules/%.tag',
+			'./node_modules/%.js',
+			'./node_modules/%'
+		].join(':')
+	}
+};
 
 {
 	const newArgs = [];
@@ -70,6 +88,7 @@ const namespace = {};
 	for (const arg of args._) {
 		let variable;
 
+		// TODO make sure they're not overwriting an existing value.
 		if (arg[0] === '+') {
 			// TODO validate tag format
 			namespace[arg.substring(1)] = {
@@ -89,6 +108,8 @@ const namespace = {};
 	args._ = newArgs;
 }
 
+args['--tagfile'] = args['--tagfile'] || './Tagfile';
+
 const tasks = args._;
 if (tasks.length === 0) {
 	tasks.push('all');
@@ -98,36 +119,25 @@ if (tasks.length === 0) {
 debugv('tasks to run:', ...tasks);
 
 async function main() {
-	await fs.access('./Tagfile', fs.constants.R_OK);
-	debugv('correct access to Tagfile in:', process.cwd());
+	await fs.access(args['--tagfile'], fs.constants.R_OK);
+	const resolvedPath = path.resolve(args['--tagfile']);
+	debugv('correct access to Tagfile:', resolvedPath);
 
-	const buf = await fs.readFile('./Tagfile');
+	const buf = await fs.readFile(resolvedPath);
 	debugv('read Tagfile completely: %d bytes', buf.length);
 	const contents = buf.toString('utf-8');
 
-	const {parseTagfile} = require('./lib/parser');
-	const {TagAPI} = require('./lib/api');
+	const parseTagfile = require('tag-parser');
 
-	const api = new TagAPI();
-
-	const namespace = {
-		TAGPATH: {
-			type: 'variable',
-			value: [
-				path.join(__dirname, 'stdlib/%.tag'),
-				'./%.tag',
-				'./%.js',
-				'./%',
-				'./node_modules/%/index.tag',
-				'./node_modules/%/index.js',
-				'./node_modules/%.tag',
-				'./node_modules/%.js',
-				'./node_modules/%'
-			].join(':')
+	const tagfile = (() => {
+		try {
+			return parseTagfile(contents);
+		} catch (error) {
+			error.source = contents;
 		}
-	};
+	})();
 
-	parseTagfile(contents, './Tagfile', {api, namespace});
+	debugv(tagfile);
 }
 
 main().catch(error => {
