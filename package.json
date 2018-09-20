@@ -8,6 +8,18 @@
 	},
 	"author": "Josh Junon <josh@junon.me>",
 	"license": "MIT",
+	"keywords": [
+		"task",
+		"runner",
+		"ninja",
+		"generator",
+		"build",
+		"system",
+		"batch",
+		"shell",
+		"script",
+		"make"
+	],
 	"engines": {
 		"node": ">=10.5.0"
 	},
