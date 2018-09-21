@@ -1,8 +1,6 @@
 <h1 align="center">
 	<br>
-	<img width="400" src="asset/logo.png" alt="Tag">
-	<br>
-	<br>
+	<img width="250" src="asset/logo.png" alt="Tag">
 	<br>
 </h1>
 
