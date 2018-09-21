@@ -70,7 +70,6 @@ if (args['--verbose']) {
 }
 
 args['--tagfile'] = args['--tagfile'] || './Tagfile';
-args['--plugin'] = args['--plugin'] || 'system';
 
 async function main() {
 	debugv('arguments: %O', args);
@@ -79,7 +78,7 @@ async function main() {
 		TAGPATH: {
 			type: 'variable',
 			value: [[
-				path.join(__dirname, 'stdlib/%.tag'),
+				path.join(__dirname, 'lib/stdlib/%.tag'),
 				'./%.tag',
 				'./%.js',
 				'./%',
@@ -90,6 +89,10 @@ async function main() {
 				'./node_modules/%'
 			].join(':')]
 		}
+	};
+
+	const commands = {
+		tag: require('./lib/stdlib/tag.js')
 	};
 
 	const tasks = [];
@@ -156,10 +159,14 @@ async function main() {
 		const tagfile = parseTagfile(contents);
 		debugv('tagfile: %O', tagfile);
 
-		const ctx = new Context({namespace});
+		const ctx = new Context({namespace, commands});
 
 		for (const statement of tagfile) {
-			parseStatement(ctx, statement);
+			// Linters are annoying sometimes.
+			// This is required to allow for any async plugins to work
+			// in a synchronous fashion.
+			// eslint-disable-next-line no-await-in-loop
+			await parseStatement(ctx, statement);
 		}
 	} catch (error) {
 		error.filename = resolvedPath;
