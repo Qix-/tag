@@ -177,7 +177,7 @@ async function main() {
 
 main()
 	.catch(error => {
-		debug('fatal error: %s', args['--verbose'] ? error.stack : error.message);
+		debug('fatal error: %s', args['--verbose'] ? error.stack : error.message.replace(/^[^ ]\s+/, ''));
 		visualizeSyntaxError(debug, error);
 		process.exit(1);
 	})
