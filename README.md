@@ -4,6 +4,8 @@
 	<br>
 </h1>
 
+> **STATUS:** Tag is in initial development. Don't use it yet - you won't have a fun time when things change.
+
 **Tag** is a task runner/build script generator that employs a _very_ basic
 DSL in order to specify job dependencies with potentially complex
 build configurations (variants).
