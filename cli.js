@@ -8,15 +8,16 @@ const arg = require('arg');
 const chalk = require('chalk');
 const _debug = require('debug');
 const fs = require('promise-fs');
+const parseTagfile = require('tag-parser');
 
 const {visualizeSyntaxError} = require('./lib/syntax-error');
+const {Context, parseStatement} = require('./lib/context');
 
 // NOTE: don't import anything before this line that
 //       uses the `tag:*` namespaces.
 _debug.names.push(/^tag$/, /^tag:echo$/);
 
 const debug = _debug('tag');
-const debugEcho = _debug('tag:echo');
 let debugv = () => {};
 
 const variablePattern = /^([a-z_+][a-z0-9_+:]*)=(.+)?$/i;
@@ -151,21 +152,23 @@ async function main() {
 	debugv('read Tagfile completely: %d bytes', buf.length);
 	const contents = buf.toString('utf-8');
 
-	const parseTagfile = require('tag-parser');
-
 	debugv('initial namespace (before plugin): %O', namespace);
 
-	const tagfile = (() => {
-		try {
-			return parseTagfile(contents);
-		} catch (error) {
-			error.filename = resolvedPath;
-			error.source = contents;
-			throw error;
-		}
-	})();
+	try {
+		const tagfile = parseTagfile(contents);
+		debugv('tagfile: %O', tagfile);
 
-	debugv('tagfile: %O', tagfile);
+		const ctx = new Context({namespace});
+
+		for (const statement of tagfile) {
+			parseStatement(ctx, statement);
+		}
+	} catch (error) {
+		error.filename = resolvedPath;
+		error.source = contents;
+		console.log(require('util').inspect(error, {showHidden: true}));
+		throw error;
+	}
 }
 
 main()
