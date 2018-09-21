@@ -1,5 +1,7 @@
 #!/usr/bin/env node --experimental-worker
 
+Error.stackTraceLimit = Infinity;
+
 const path = require('path');
 
 const arg = require('arg');
@@ -157,6 +159,7 @@ async function main() {
 		} catch (error) {
 			error.filename = resolvedPath;
 			error.source = contents;
+			throw error;
 		}
 	})();
 
@@ -165,6 +168,6 @@ async function main() {
 
 main().catch(error => {
 	// TODO check for contents and position and show source location
-	debug('fatal error: %s', error.message);
+	debug('fatal error: %s', args['--verbose'] ? error.stack : error.message);
 	process.exit(1);
 });
