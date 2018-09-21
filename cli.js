@@ -9,6 +9,8 @@ const chalk = require('chalk');
 const _debug = require('debug');
 const fs = require('promise-fs');
 
+const {visualizeSyntaxError} = require('./lib/syntax-error');
+
 // NOTE: don't import anything before this line that
 //       uses the `tag:*` namespaces.
 _debug.names.push(/^tag$/, /^tag:echo$/);
@@ -166,8 +168,15 @@ async function main() {
 	debugv('tagfile: %O', tagfile);
 }
 
-main().catch(error => {
-	// TODO check for contents and position and show source location
-	debug('fatal error: %s', args['--verbose'] ? error.stack : error.message);
-	process.exit(1);
-});
+main()
+	.catch(error => {
+		debug('fatal error: %s', args['--verbose'] ? error.stack : error.message);
+		visualizeSyntaxError(debug, error);
+		process.exit(1);
+	})
+	.catch(error => {
+		// Something went wrong internall.
+		// Fail-safe error report here.
+		console.error(error.stack);
+		process.exit(10);
+	});
