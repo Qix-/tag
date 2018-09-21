@@ -217,8 +217,7 @@ As a bonus, here's some ~~absurd~~ advanced stuff you can do with the Tag langua
 # Double substitution works like you'd expect.
 SET FOO=BAR
 SET BAR=baz
-ON baz
-@{{FOO}} ECHO baz is enabled. # echoes (double substitution of FOO)
+ECHO {{FOO}} # echos "baz"
 
 # If, for whatever reason, you want to localize something, this is one
 # way you could do it.
