@@ -29,8 +29,8 @@ Tag is most similar to GNU Make, and consists of just a few primitives:
 Install Tag by running **one** of the following commands:
 
 ```console
-$ yarn global add tag
-$ npm i -g tag
+$ yarn global add tag-cli
+$ npm i -g tag-cli
 ```
 
 ## Usage
