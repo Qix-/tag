@@ -1,12 +1,10 @@
 <h1 align="center">
 	<br>
-	<img width="400" src="asset/logo.png" alt="Tag Logo">
+	<img width="400" src="asset/logo.png" alt="Tag">
 	<br>
 	<br>
 	<br>
 </h1>
-
-# Tag
 
 **Tag** is a task runner/build script generator that employs a _very_ basic
 DSL in order to specify job dependencies with potentially complex
