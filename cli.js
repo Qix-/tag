@@ -78,7 +78,7 @@ async function main() {
 	const namespace = {
 		TAGPATH: {
 			type: 'variable',
-			value: [
+			value: [[
 				path.join(__dirname, 'stdlib/%.tag'),
 				'./%.tag',
 				'./%.js',
@@ -88,7 +88,7 @@ async function main() {
 				'./node_modules/%.tag',
 				'./node_modules/%.js',
 				'./node_modules/%'
-			].join(':')
+			].join(':')]
 		}
 	};
 
@@ -112,7 +112,7 @@ async function main() {
 				type: 'tag',
 				enabled: true
 			};
-		} else if ((variable = pattern.variable.exec(arg))) {
+		} else if ((variable = pattern.variableAssignment.exec(arg))) {
 			const name = variable[1];
 
 			if (namespace[name] && namespace[name].type !== 'variable') {
