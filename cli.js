@@ -30,9 +30,6 @@ const helpText = chalk`
    --version, -V             shows the version string
    --verbose, -v             verbose output
 
-   --plugin, -P {underline name}         plugin to use
-                             (defaults to 'system')
-
    --tagfile, -F {underline filename}    the filename to read as the Tagfile
                              (defaults to './Tagfile')
 
@@ -53,10 +50,7 @@ const args = arg({
 	'-V': '--version',
 
 	'--tagfile': String,
-	'-F': '--tagfile',
-
-	'--plugin': String,
-	'-P': '--plugin'
+	'-F': '--tagfile'
 });
 
 if (args['--help']) {

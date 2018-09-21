@@ -29,10 +29,6 @@ $ yarn global add tag
 $ npm i -g tag
 ```
 
-Installation includes the following plugins out of the box:
-
-- **System** (`tag-plugin-system`) - runs the commands using the `child_process` module built into Node.
-
 ## Usage
 
 ```console
@@ -47,9 +43,6 @@ $ tag --help
    --help                    shows this help message
    --version, -V             shows the version string
    --verbose, -v             verbose output
-
-   --plugin, -P name         plugin to use
-                             (defaults to 'system')
 
    --tagfile, -F filename    the filename to read as the Tagfile
                              (defaults to './Tagfile')
