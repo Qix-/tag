@@ -11,7 +11,7 @@ const fs = require('promise-fs');
 const parseTagfile = require('tag-parser');
 
 const {visualizeSyntaxError} = require('./lib/syntax-error');
-const {Context, parseStatement} = require('./lib/context');
+const pattern = require('./lib/patterns');
 
 // NOTE: don't import anything before this line that
 //       uses the `tag:*` namespaces.
@@ -19,10 +19,6 @@ _debug.names.push(/^tag$/, /^tag:echo$/);
 
 const debug = _debug('tag');
 let debugv = () => {};
-
-const variablePattern = /^([a-z_+][a-z0-9_+:]*)=(.+)?$/i;
-const taskPattern = /^[a-z_+][a-z0-9_+:]*$/i;
-const tagPattern = /^[a-z_+][a-z0-9_+:]*$/i;
 
 const helpText = chalk`
  {bold tag} - yet another task runner
@@ -104,7 +100,7 @@ async function main() {
 		if (arg[0] === '@') {
 			const name = arg.substring(1);
 
-			if (!tagPattern.test(name)) {
+			if (!pattern.tag.test(name)) {
 				throw new Error(`invalid tag format: ${name}`);
 			}
 
@@ -116,7 +112,7 @@ async function main() {
 				type: 'tag',
 				enabled: true
 			};
-		} else if ((variable = variablePattern.exec(arg))) {
+		} else if ((variable = pattern.variable.exec(arg))) {
 			const name = variable[1];
 
 			if (namespace[name] && namespace[name].type !== 'variable') {
@@ -137,7 +133,7 @@ async function main() {
 	}
 
 	tasks.forEach(task => {
-		if (!taskPattern.test(task)) {
+		if (!pattern.task.test(task)) {
 			throw new Error(`task name is invalid: ${task}`);
 		}
 	});
@@ -155,6 +151,8 @@ async function main() {
 	debugv('initial namespace (before plugin): %O', namespace);
 
 	try {
+		const {Context, parseStatement} = require('./lib/context');
+
 		const tagfile = parseTagfile(contents);
 		debugv('tagfile: %O', tagfile);
 
@@ -166,7 +164,6 @@ async function main() {
 	} catch (error) {
 		error.filename = resolvedPath;
 		error.source = contents;
-		console.log(require('util').inspect(error, {showHidden: true}));
 		throw error;
 	}
 }
