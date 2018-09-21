@@ -161,26 +161,6 @@ async function main() {
 	})();
 
 	debugv('tagfile: %O', tagfile);
-
-	const plugin = (() => {
-		try {
-			return require(`tag-plugin-${args['--plugin']}`);
-		} catch (error) {
-			if (error.code === 'MODULE_NOT_FOUND') {
-				throw new Error(`tag plugin '${args['--plugin']}' not found (is 'tag-plugin-${args['--plugin']}' installed?)`);
-			}
-
-			throw error;
-		}
-	})();
-
-	// Return to allow promises to work
-	return plugin({
-		tagfile,
-		namespace,
-		log: debug,
-		echo: debugEcho
-	});
 }
 
 main().catch(error => {
