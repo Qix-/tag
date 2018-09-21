@@ -1,4 +1,10 @@
-![Tag Logo](asset/logo.png)
+<h1 align="center">
+	<br>
+	<img width="400" src="asset/logo.png" alt="Tag Logo">
+	<br>
+	<br>
+	<br>
+</h1>
 
 # Tag
 
