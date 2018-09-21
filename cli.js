@@ -77,7 +77,8 @@ async function main() {
 	const namespace = {
 		TAGPATH: {
 			type: 'variable',
-			value: [[
+			value: [{literal: [
+				path.join(__dirname, 'lib/stdlib/%.js'),
 				path.join(__dirname, 'lib/stdlib/%.tag'),
 				'./%.tag',
 				'./%.js',
@@ -87,12 +88,8 @@ async function main() {
 				'./node_modules/%.tag',
 				'./node_modules/%.js',
 				'./node_modules/%'
-			].join(':')]
+			].join(':')}]
 		}
-	};
-
-	const commands = {
-		tag: require('./lib/stdlib/tag.js')
 	};
 
 	const tasks = [];
@@ -159,7 +156,9 @@ async function main() {
 		const tagfile = parseTagfile(contents);
 		debugv('tagfile: %O', tagfile);
 
-		const ctx = new Context({namespace, commands});
+		const ctx = new Context({namespace});
+
+		await ctx.use('tag');
 
 		for (const statement of tagfile) {
 			// Linters are annoying sometimes.
@@ -169,8 +168,10 @@ async function main() {
 			await parseStatement(ctx, statement);
 		}
 	} catch (error) {
-		error.filename = resolvedPath;
-		error.source = contents;
+		if (!error.filename || !error.source) {
+			error.filename = resolvedPath;
+			error.source = contents;
+		}
 		throw error;
 	}
 }
