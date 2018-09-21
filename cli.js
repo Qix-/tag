@@ -121,7 +121,7 @@ async function main() {
 
 			namespace[name] = {
 				type: 'variable',
-				value: variable[2]
+				value: [{literal: variable[2]}]
 			};
 		} else {
 			tasks.push(arg);
