@@ -8,6 +8,13 @@
 	},
 	"author": "Josh Junon <josh@junon.me>",
 	"license": "MIT",
+	"files": [
+		"lib/**/*",
+		"cli.js",
+		"asset/logo.png",
+		"README.md",
+		"LICENSE"
+	],
 	"keywords": [
 		"task",
 		"runner",
