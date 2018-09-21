@@ -1,3 +1,5 @@
+![Tag Logo](asset/logo.png)
+
 # Tag
 
 **Tag** is a task runner/build script generator that employs a _very_ basic
