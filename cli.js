@@ -78,15 +78,15 @@ async function main() {
 		TAGPATH: {
 			type: 'variable',
 			value: [{literal: [
-				path.join(__dirname, 'lib/stdlib/%.js'),
+				path.join(__dirname, 'lib/stdlib/%.tag.js'),
 				path.join(__dirname, 'lib/stdlib/%.tag'),
 				'./%.tag',
-				'./%.js',
+				'./%.tag.js',
 				'./%',
 				'./node_modules/%/index.tag',
-				'./node_modules/%/index.js',
+				'./node_modules/%/index.tag.js',
 				'./node_modules/%.tag',
-				'./node_modules/%.js',
+				'./node_modules/%.tag.js',
 				'./node_modules/%'
 			].join(':')}]
 		}
