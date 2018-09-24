@@ -151,13 +151,13 @@ async function main() {
 	debugv('initial namespace (before plugin): %O', namespace);
 
 	try {
-		const {Context} = require('./lib/context');
+		const {HostContext} = require('./lib/context');
 		const {parseStatement} = require('./lib/parse');
 
 		const tagfile = parseTagfile(contents);
 		debugv('tagfile: %O', tagfile);
 
-		const ctx = new Context({namespace});
+		const ctx = new HostContext({namespace});
 
 		await ctx.use('tag');
 
