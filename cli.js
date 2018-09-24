@@ -159,8 +159,6 @@ async function main() {
 
 		const ctx = new HostContext({namespace});
 
-		await ctx.use('tag');
-
 		for (const statement of tagfile) {
 			// Linters are annoying sometimes.
 			// This is required to allow for any async plugins to work
