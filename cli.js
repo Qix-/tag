@@ -157,14 +157,16 @@ async function main() {
 		const tagfile = parseTagfile(contents);
 		debugv('tagfile: %O', tagfile);
 
-		const ctx = new HostContext({namespace});
+		const contexts = [];
+
+		const hostCtx = new HostContext({namespace});
+		contexts.push(hostCtx);
 
 		for (const statement of tagfile) {
 			// Linters are annoying sometimes.
-			// This is required to allow for any async plugins to work
-			// in a synchronous fashion.
+			// The await is REQUIRED. Do not remove it.
 			// eslint-disable-next-line no-await-in-loop
-			await parseStatement(ctx, statement);
+			await Promise.all(contexts.map(ctx => parseStatement(ctx, statement)));
 		}
 	} catch (error) {
 		if (!error.filename || !error.source) {
